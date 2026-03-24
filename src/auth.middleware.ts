@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken';
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    if (req.method === 'OPTIONS')  return next();
+    if (req.method === 'OPTIONS') return next();
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -18,7 +18,8 @@ export class AuthMiddleware implements NestMiddleware {
       jwt.verify(token, secret);
       next();
     } catch (err) {
-      throw new UnauthorizedException('Token expirado o bloqueado por el Gateway');
+      const errorMessage = err instanceof Error ? err.message : 'Error de validación desconocido';
+      throw new UnauthorizedException('Token expirado o bloqueado por el Gateway', errorMessage);
     }
   }
 }

@@ -6,9 +6,7 @@ import { AuthMiddleware } from './auth.middleware';
 import { GatewayController } from './gateway.controller';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-  ],
+  imports: [ConfigModule.forRoot({ isGlobal: true })],
   controllers: [GatewayController],
   providers: [],
 })
