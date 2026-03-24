@@ -1,98 +1,69 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 API Gateway - LinkTik Technical Test
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Este repositorio contiene el **API Gateway** principal para el ecosistema de microservicios desarrollado como parte de la prueba técnica de LinkTik.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+El Gateway está construido con **NestJS 11** y actúa como el punto de entrada único (Single Entry Point) y proxy inverso para enrutar las peticiones del frontend hacia los microservicios correspondientes, manejando la seguridad y validación de tokens de manera centralizada.
 
-## Description
+## 🏗️ Arquitectura del Ecosistema
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+El sistema sigue un patrón de diseño de Microservicios, orquestado a través de este Gateway:
 
-## Project setup
+- **API Gateway (Este repo):** Puerto `:8080`
+- **Auth Microservice:** Puerto `:3002` (Gestiona JWT y usuarios)
+- **Products Microservice:** Puerto `:3003` (Catálogo e inventario)
+- **Orders Microservice:** Puerto `:3001` (Gestión de compras)
 
-```bash
-$ npm install
+> _Nota: Los puertos pueden variar según la configuración del archivo `.env`._
+
+## 🛡️ Características Principales
+
+1. **Reverse Proxy Dinámico:** Implementado con `http-proxy-middleware` para reenviar peticiones conservando el contexto original (URLs intactas).
+2. **Validación JWT Centralizada:** Un `AuthMiddleware` intercepta las peticiones a rutas protegidas (como `/orders`) y valida el Bearer Token antes de permitir que la petición alcance el microservicio interno.
+3. **Manejo de CORS:** Configurado nativamente para permitir la comunicación fluida con la aplicación Frontend en React/Next.js.
+4. **Contenerización:** Listo para ser desplegado en entornos aislados con Docker.
+
+## ⚙️ Configuración del Entorno (.env)
+
+Crea un archivo `.env` en la raíz del proyecto basándote en el archivo de ejemplo (`.env.example` si existe). Las variables clave son:
+
+```env
+PORT=8080
+JWT_SECRET=secret-key
+AUTH_SERVICE_URL=[http://127.0.0.1:3002](http://127.0.0.1:3002)
+PRODUCTS_SERVICE_URL=[http://127.0.0.1:3003](http://127.0.0.1:3003)
+ORDERS_SERVICE_URL=[http://127.0.0.1:3001](http://127.0.0.1:3001)
 ```
 
-## Compile and run the project
+## 🚀 Despliegue y Ejecución
+
+Opción A: Ejecución Local (Desarrollo)
+Si deseas correr el Gateway en tu máquina local para desarrollo:
 
 ```bash
-# development
-$ npm run start
+# 1. Instalar dependencias
+npm install --legacy-peer-deps
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+# 2. Levantar el servicio en modo desarrollo
+npm run start:dev
 ```
 
-## Run tests
+Opción B: Usando Docker (Producción)
+Para construir y levantar el contenedor de forma aislada:
 
 ```bash
-# unit tests
-$ npm run test
+# 1. Construir la imagen
+docker build -t api-gateway .
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# 2. Correr el contenedor
+docker run -p 8080:8080 --env-file .env api-gateway
 ```
 
-## Deployment
+## 🛣️ Enrutamiento Configurado
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+El Gateway captura y redirige automáticamente las peticiones hacia sus respectivos microservicios:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+| Métodos | Endpoint Base | Microservicio Destino | Seguridad |
+| :--- | :--- | :--- | :--- |
+| `GET`, `POST` | `/auth/*` | ➔ **Auth Service** | Pública |
+| `GET` | `/products/*` | ➔ **Products Service**| Pública pero 🔒 Requiere JWT para crear/actualizar un producto |
+| `GET`, `POST`, `PATCH` | `/orders/*` | ➔ **Orders Service** | 🔒 Requiere JWT |
